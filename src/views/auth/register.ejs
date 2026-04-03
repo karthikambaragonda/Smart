@@ -1,0 +1,50 @@
+<section class="auth-shell">
+  <div class="auth-panel">
+    <p class="eyebrow">Secure Onboarding</p>
+    <h1>Create your SRU account</h1>
+    <p class="text-secondary">Use your official college email to access ordering, pickup tracking, and campus table booking.</p>
+    <div class="rule-box">
+      <strong>Important rules</strong>
+      <ul class="mb-0 mt-2">
+        <li>Use only your `@sru.edu.in` email.</li>
+        <li>Collect orders within 5 minutes after ready status.</li>
+        <li>Uncollected orders attract double penalty.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="panel-card auth-form-card">
+    <h2 class="mb-3">Register</h2>
+    <% if (errors.length) { %>
+      <div class="alert alert-danger">
+        <% errors.forEach((error) => { %>
+          <div><%= error.msg %></div>
+        <% }) %>
+      </div>
+    <% } %>
+    <form action="/auth/register" method="POST" class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Full Name</label>
+        <input class="form-control form-control-campus" type="text" name="name" value="<%= formData.name || '' %>" required />
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Department</label>
+        <input class="form-control form-control-campus" type="text" name="department" value="<%= formData.department || '' %>" required />
+      </div>
+      <div class="col-12">
+        <label class="form-label">College Email</label>
+        <input class="form-control form-control-campus" type="email" name="email" placeholder="yourname@sru.edu.in" value="<%= formData.email || '' %>" required />
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Password</label>
+        <input class="form-control form-control-campus" type="password" name="password" required />
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Confirm Password</label>
+        <input class="form-control form-control-campus" type="password" name="confirmPassword" required />
+      </div>
+      <div class="col-12">
+        <button class="btn btn-campus-primary w-100" type="submit">Create Account</button>
+      </div>
+    </form>
+  </div>
+</section>

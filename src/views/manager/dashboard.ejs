@@ -1,0 +1,179 @@
+<div class="row align-items-center g-3 mt-4 mb-4">
+  <div class="col-md-8">
+    <h1 class="h3 mb-1">Manager Dashboard</h1>
+    <p class="text-secondary mb-0">Live overview of menu, layout, revenue, and campus operations.</p>
+  </div>
+  <div class="col-md-4 text-md-end">
+    <span class="badge text-bg-light border px-3 py-2 rounded-pill">Auto table layout enabled</span>
+  </div>
+</div>
+
+<div class="metrics-grid">
+  <div class="metric-card">
+    <span>Orders Today</span>
+    <strong><%= metrics.orderCount %></strong>
+  </div>
+  <div class="metric-card">
+    <span>Revenue Today</span>
+    <strong>Rs. <%= metrics.totalRevenue %></strong>
+  </div>
+  <div class="metric-card">
+    <span>Penalty In Revenue</span>
+    <strong>Rs. <%= metrics.penaltyRevenue %></strong>
+  </div>
+  <div class="metric-card">
+    <span>Peak Slot</span>
+    <strong><%= metrics.peakSlot %></strong>
+  </div>
+  <div class="metric-card">
+    <span>Pending Orders</span>
+    <strong><%= metrics.pendingCount %></strong>
+  </div>
+</div>
+
+<div class="row g-4 mt-1">
+  <div class="col-lg-5">
+    <div class="panel-card section-card mb-4">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow mb-2">Menu Admin</p>
+          <h2 class="mb-1">Create Menu Item</h2>
+          <p class="text-secondary mb-0">Add service-ready items for breakfast, lunch, or snacks.</p>
+        </div>
+      </div>
+      <form action="/manager/menu-items" method="POST" class="row g-3">
+        <div class="col-12">
+          <label class="form-label">Item Name</label>
+          <input class="form-control form-control-campus" name="name" placeholder="Example: South Indian Combo" required />
+        </div>
+        <div class="col-12">
+          <label class="form-label">Description</label>
+          <textarea class="form-control form-control-campus" name="description" rows="3" placeholder="Briefly describe the meal and what is included." required></textarea>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Category</label>
+          <select class="form-select form-control-campus" name="category">
+            <option value="breakfast">Breakfast</option>
+            <option value="lunch">Lunch</option>
+            <option value="snacks">Snacks</option>
+            <option value="dinner">Dinner</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Price</label>
+          <input class="form-control form-control-campus" type="number" min="1" name="price" placeholder="90" required />
+        </div>
+        <div class="col-12">
+          <button class="btn btn-campus-primary" type="submit">Add Menu Item</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="panel-card section-card">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow mb-2">Floor Setup</p>
+          <h2 class="mb-1">Create Table</h2>
+          <p class="text-secondary mb-0">Only enter the table number and seat count. The layout is generated automatically.</p>
+        </div>
+      </div>
+      <form action="/manager/tables" method="POST" class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Table Number</label>
+          <input class="form-control form-control-campus" name="tableNumber" placeholder="T7" required />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Seats</label>
+          <input class="form-control form-control-campus" type="number" min="2" max="12" name="seats" placeholder="4" required />
+        </div>
+        <div class="col-12">
+          <div class="dynamic-order-note">New tables are placed into the next available layout slot automatically.</div>
+        </div>
+        <div class="col-12">
+          <button class="btn btn-campus-secondary" type="submit">Add Table</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="panel-card section-card mb-4">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow mb-2">Live Offering</p>
+          <h2 class="mb-1">Current Menu</h2>
+        </div>
+      </div>
+      <div class="row g-3">
+        <% menuItems.forEach((item) => { %>
+          <div class="col-md-6">
+            <div class="order-card h-100">
+              <div class="small text-secondary text-uppercase"><%= item.category %></div>
+              <strong><%= item.name %></strong>
+              <p class="small text-secondary mb-2"><%= item.description %></p>
+              <span class="price-tag">Rs. <%= item.price %></span>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <div class="panel-card section-card mb-4">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow mb-2">Operations Feed</p>
+          <h2 class="mb-1">Recent Orders</h2>
+        </div>
+      </div>
+      <% recentOrders.forEach((order) => { %>
+        <div class="order-card">
+          <div class="d-flex justify-content-between">
+            <strong><%= order.user?.name || "Unknown" %></strong>
+            <span class="badge text-bg-dark"><%= order.status %></span>
+          </div>
+          <div class="small text-secondary mt-1"><%= order.user?.email || "" %></div>
+          <div class="small mt-1">Rs. <%= order.totalAmount %> | <%= order.orderType %> | penalty <%= order.penaltyApplied ? "yes" : "no" %></div>
+          <% if (order.carriedPenaltyAmount) { %>
+            <div class="small text-danger mt-1">Included previous penalties: Rs. <%= order.carriedPenaltyAmount %></div>
+          <% } %>
+          <div class="small text-secondary mt-1">Pickup timer: <%= order.pickupDeadline ? "active" : "starts on ready status" %></div>
+        </div>
+      <% }) %>
+    </div>
+
+    <div class="panel-card section-card">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow mb-2">Campus Overview</p>
+          <h2 class="mb-1">Latest Users and Layout</h2>
+        </div>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-6">
+          <% users.forEach((user) => { %>
+            <div class="order-card">
+              <strong><%= user.name %></strong>
+              <div class="small text-secondary"><%= user.email %></div>
+              <div class="small mt-1"><%= user.role %> | penalty Rs. <%= user.penaltyAmount %></div>
+            </div>
+          <% }) %>
+        </div>
+        <div class="col-md-6">
+          <div class="table-layout table-layout-grid manager-layout">
+            <% tables.forEach((table) => { %>
+              <div class="table-node table-node-grid table-<%= table.status %>">
+                <button type="button" disabled>
+                  <strong><%= table.tableNumber %></strong>
+                  <span><%= table.seats %> seats</span>
+                  <% if (table.status === "reserved" && table.reservationWindow?.end) { %>
+                    <small data-countdown="<%= new Date(table.reservationWindow.end).toISOString() %>">15:00</small>
+                  <% } %>
+                </button>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

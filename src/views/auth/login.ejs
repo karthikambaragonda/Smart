@@ -1,0 +1,40 @@
+<section class="auth-shell">
+  <div class="auth-panel">
+    <p class="eyebrow">Campus Access</p>
+    <h1>Sign in to continue</h1>
+    <p class="text-secondary">Access your consumer, staff, or manager workspace with your official SRU account.</p>
+    <div class="auth-info-grid mt-4">
+      <div class="auth-info-card">
+        <strong>Realtime dashboards</strong>
+        <span>Live order, table, and notification updates.</span>
+      </div>
+      <div class="auth-info-card">
+        <strong>Secure login</strong>
+        <span>Only SRU email accounts are accepted.</span>
+      </div>
+    </div>
+  </div>
+  <div class="panel-card auth-form-card">
+    <h2 class="mb-3">Login</h2>
+    <% if (errors.length) { %>
+      <div class="alert alert-danger">
+        <% errors.forEach((error) => { %>
+          <div><%= error.msg %></div>
+        <% }) %>
+      </div>
+    <% } %>
+    <form action="/auth/login" method="POST" class="row g-3">
+      <div class="col-12">
+        <label class="form-label">College Email</label>
+        <input class="form-control form-control-campus" type="email" name="email" placeholder="yourname@sru.edu.in" value="<%= formData.email || '' %>" required />
+      </div>
+      <div class="col-12">
+        <label class="form-label">Password</label>
+        <input class="form-control form-control-campus" type="password" name="password" required />
+      </div>
+      <div class="col-12">
+        <button class="btn btn-campus-primary w-100" type="submit">Login</button>
+      </div>
+    </form>
+  </div>
+</section>

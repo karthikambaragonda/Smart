@@ -1,0 +1,35 @@
+<nav class="navbar navbar-expand-lg navbar-dark campus-nav">
+  <div class="container campus-container">
+    <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/">
+      <span class="brand-mark">SC</span>
+      <span>Smart Campus Food</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNav">
+      <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+        <% if (!currentUser) { %>
+          <a class="nav-link <%= currentPath === '/auth/login' ? 'active' : '' %>" href="/auth/login">Login</a>
+          <a class="btn btn-campus-primary" href="/auth/register">Register</a>
+        <% } else { %>
+          <% if (currentUser.role === "consumer") { %>
+            <a class="nav-link <%= currentPath === '/dashboard' ? 'active' : '' %>" href="/consumer/dashboard">Consumer</a>
+            <a class="nav-link" href="/consumer/orders">Orders</a>
+            <a class="nav-link" href="/consumer/penalties">Penalties</a>
+          <% } %>
+          <% if (currentUser.role === "staff") { %>
+            <a class="nav-link <%= currentPath === '/dashboard' ? 'active' : '' %>" href="/staff/dashboard">Staff</a>
+          <% } %>
+          <% if (currentUser.role === "manager") { %>
+            <a class="nav-link <%= currentPath === '/dashboard' ? 'active' : '' %>" href="/manager/dashboard">Manager</a>
+          <% } %>
+          <span class="nav-link text-white-50 nav-user-pill"><%= currentUser.name %></span>
+          <form action="/auth/logout" method="POST">
+            <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+          </form>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</nav>

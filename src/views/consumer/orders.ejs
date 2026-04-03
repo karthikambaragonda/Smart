@@ -1,0 +1,72 @@
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 mt-4">
+  <div>
+    <h1 class="h3 mb-1">My Orders</h1>
+    <p class="text-secondary mb-0">Live order status and delivery details.</p>
+  </div>
+  <a href="/consumer/dashboard" class="btn btn-outline-secondary">Back</a>
+</div>
+
+<div class="panel-card section-card">
+  <% if (!orders.length) { %>
+    <div class="empty-state">
+      <h3>No orders yet</h3>
+      <p>Orders confirmed from the cart will appear here.</p>
+    </div>
+  <% } %>
+  <% orders.forEach((order) => { %>
+    <% const readyAt = order.estimatedReadyAt ? new Date(order.estimatedReadyAt) : null; %>
+    <% const deadlineAt = order.pickupDeadline ? new Date(order.pickupDeadline) : null; %>
+    <div class="order-card mb-3">
+      <div class="d-flex justify-content-between align-items-start gap-3">
+        <div>
+          <strong>Rs. <%= order.totalAmount %></strong>
+          <div class="small text-secondary mt-1 text-capitalize"><%= order.orderType %> | <%= order.status %></div>
+          <div class="small text-secondary mt-1"><%= order.items.map((item) => `${item.name} x${item.quantity}`).join(", ") %></div>
+        </div>
+        <div class="text-end">
+          <span class="badge <%= order.status === 'penalised' ? 'text-bg-danger' : 'bg-dark-subtle text-dark' %> rounded-pill px-3 py-2 text-capitalize">
+            <%= order.status === "penalised" ? "cancelled / penalised" : order.status %>
+          </span>
+          <% if (order.carriedPenaltyAmount) { %>
+            <div class="small text-danger mt-2">Included penalty Rs. <%= order.carriedPenaltyAmount %></div>
+          <% } %>
+        </div>
+      </div>
+      <% if (order.status !== "delivered" && order.status !== "penalised" && order.status !== "cancelled") { %>
+        <div class="countdown-grid mt-3">
+          <div>
+            <span class="countdown-label">Expected ready</span>
+            <% if (order.status === "ready") { %>
+              <strong class="countdown-value">Ready now</strong>
+            <% } else if (readyAt && !Number.isNaN(readyAt.getTime())) { %>
+              <strong class="countdown-value" data-countdown="<%= readyAt.toISOString() %>"><%= readyAt.toLocaleTimeString() %></strong>
+            <% } else { %>
+              <strong class="countdown-value">Pending</strong>
+            <% } %>
+          </div>
+          <div>
+            <span class="countdown-label">Pickup window</span>
+            <% if (order.status === "ready" && deadlineAt && !Number.isNaN(deadlineAt.getTime())) { %>
+              <strong class="countdown-value" data-countdown="<%= deadlineAt.toISOString() %>"><%= deadlineAt.toLocaleTimeString() %></strong>
+            <% } else { %>
+              <strong class="countdown-value">Starts when ready</strong>
+            <% } %>
+          </div>
+        </div>
+      <% } else if (order.status === "delivered") { %>
+        <div class="alert alert-success mt-3 mb-0 py-2">Delivered successfully.</div>
+      <% } else { %>
+        <div class="alert alert-danger mt-3 mb-0 py-2">Order cancelled and penalised.</div>
+      <% } %>
+      <div class="small mt-3">
+        <% if (order.orderType === "delivery") { %>
+          Delivery location: <%= order.deliveryLocation %>
+        <% } else if (order.orderType === "dine-in") { %>
+          Served at: <%= order.serviceLocation || "Reserved table" %>
+        <% } else { %>
+          Pickup from: <%= order.serviceLocation || "Pickup Counter" %>
+        <% } %>
+      </div>
+    </div>
+  <% }) %>
+</div>

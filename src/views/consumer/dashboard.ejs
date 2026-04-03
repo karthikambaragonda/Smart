@@ -1,0 +1,185 @@
+<div class="row align-items-center g-3 mt-4 mb-4">
+  <div class="col-md-8">
+    <h1 class="h3 mb-1">Consumer Dashboard</h1>
+    <p class="text-secondary mb-0">Place orders, reserve tables, and track pickup in real time.</p>
+  </div>
+  <div class="col-md-4 text-md-end">
+    <span class="badge <%= activeWindow ? 'text-bg-success' : 'text-bg-secondary' %> px-3 py-2 rounded-pill">
+      <%= activeWindow ? `${activeWindow.label} live` : 'Canteen closed' %>
+    </span>
+  </div>
+</div>
+
+<% if (readyPickupOrder) { %>
+  <div class="pickup-modal-backdrop" id="pickupPopup" data-order-id="<%= readyPickupOrder._id %>">
+    <div class="pickup-modal-card">
+      <div class="pickup-modal-head">
+        <div>
+          <p class="eyebrow mb-2">Pickup Alert</p>
+          <h2 class="mb-1">Your order is ready</h2>
+        </div>
+        <button type="button" class="pickup-close" id="pickupPopupClose" aria-label="Close popup">x</button>
+      </div>
+      <div class="rule-box mb-3">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+          <div>
+            <strong>Collect now from <%= readyPickupOrder.serviceLocation %></strong>
+            <div class="small text-secondary mt-1">
+              <%= readyPickupOrder.items.map((item) => `${item.name} x${item.quantity}`).join(", ") %>
+            </div>
+          </div>
+          <span class="price-tag">Rs. <%= readyPickupOrder.totalAmount %></span>
+        </div>
+      </div>
+      <div class="countdown-grid">
+        <div>
+          <span class="countdown-label">Pickup ends in</span>
+          <strong class="countdown-value countdown-urgent" data-countdown="<%= new Date(readyPickupOrder.pickupDeadline).toISOString() %>">
+            <%= new Date(readyPickupOrder.pickupDeadline).toLocaleTimeString() %>
+          </strong>
+        </div>
+        <div>
+          <span class="countdown-label">Penalty if missed</span>
+          <strong class="countdown-value text-danger">Rs. <%= (readyPickupOrder.subtotalAmount || readyPickupOrder.totalAmount) * 2 %></strong>
+        </div>
+      </div>
+      <p class="small text-secondary mt-3 mb-0">Please collect before the timer ends to avoid penalty.</p>
+    </div>
+  </div>
+<% } %>
+
+<div class="quick-links-grid mb-4">
+  <a href="/consumer/orders" class="panel-card quick-link-card text-decoration-none">
+    <h2 class="h5 mb-1">Orders</h2>
+    <p class="text-secondary mb-0">Track active and completed orders.</p>
+  </a>
+  <a href="/consumer/penalties" class="panel-card quick-link-card text-decoration-none">
+    <h2 class="h5 mb-1">Penalties</h2>
+    <p class="text-secondary mb-0">View outstanding balance and history.</p>
+  </a>
+</div>
+
+<% if (cart) { %>
+  <div class="panel-card mb-4 cart-banner">
+    <div>
+      <p class="eyebrow mb-2">Saved Cart</p>
+      <h2 class="mb-1">You already have a draft order</h2>
+      <p class="text-secondary mb-0"><%= cart.items.length %> items | <span class="text-capitalize"><%= cart.orderType %></span> | Rs. <%= cart.totalAmount %></p>
+    </div>
+    <div class="hero-actions">
+      <a href="/consumer/cart" class="btn btn-campus-primary">Proceed to Cart</a>
+      <form action="/consumer/cart/cancel" method="POST">
+        <button type="submit" class="btn btn-outline-secondary">Cancel Cart</button>
+      </form>
+    </div>
+  </div>
+<% } %>
+
+<div class="row g-4">
+  <div class="col-xl-8">
+    <div class="panel-card section-card">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h2 class="h4 mb-1">New Order</h2>
+          <p class="text-secondary mb-0">Select items for the current service window.</p>
+        </div>
+      </div>
+      <% if (!activeWindow) { %>
+        <div class="empty-state">
+          <h3>Canteen Closed</h3>
+          <p>Ordering is active from 7:00-11:00 AM, 11:00 AM-4:00 PM, 4:00-6:00 PM, and 6:00-9:00 PM.</p>
+        </div>
+      <% } else { %>
+        <form action="/consumer/cart" method="POST">
+          <div class="row g-3">
+            <% menuItems.forEach((item) => { %>
+              <div class="col-md-6">
+                <label class="menu-card">
+                  <div class="d-flex justify-content-between align-items-start gap-3">
+                    <div>
+                      <input type="checkbox" class="form-check-input me-2" name="itemIds" value="<%= item._id %>" />
+                      <strong><%= item.name %></strong>
+                      <% if (item.isPopular) { %><span class="badge text-bg-warning ms-2">Popular</span><% } %>
+                      <p class="text-secondary small mt-2 mb-0"><%= item.description %></p>
+                    </div>
+                    <span class="price-tag">Rs. <%= item.price %></span>
+                  </div>
+                  <div class="mt-3">
+                    <label class="small text-secondary">Quantity</label>
+                    <input type="number" name="quantities" value="1" min="1" max="10" class="form-control form-control-campus" />
+                  </div>
+                </label>
+              </div>
+            <% }) %>
+          </div>
+          <div class="row g-3 mt-2">
+            <div class="col-md-4">
+              <label class="form-label">Order Type</label>
+              <select class="form-select form-control-campus" id="orderType" name="orderType" required>
+                <% orderTypes.forEach((type) => { %>
+                  <option value="<%= type %>"><%= type %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="col-md-8">
+              <label class="form-label">Delivery Location</label>
+              <select class="form-select form-control-campus" id="deliveryLocation" name="deliveryLocation" disabled>
+                <option value="">Not required for dine-in / takeaway</option>
+                <% locations.forEach((location) => { %>
+                  <option value="<%= location %>"><%= location %></option>
+                <% }) %>
+              </select>
+            </div>
+          </div>
+          <div class="dynamic-order-note mt-3" id="orderTypeNote">
+            Dine-in selected. Reserve a table below before placing your order.
+          </div>
+          <button class="btn btn-campus-primary mt-3" type="submit">Proceed to Cart</button>
+        </form>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="col-xl-4">
+    <div class="panel-card section-card mb-4">
+      <div class="section-head">
+        <div>
+          <h2 class="h4 mb-1">Table Booking</h2>
+          <p class="text-secondary mb-0">Available only for dine-in orders.</p>
+        </div>
+      </div>
+      <% if (reservedTable) { %>
+        <div class="rule-box mb-3">
+          Active reservation: <strong><%= reservedTable.tableNumber %></strong>
+          <% if (reservedTable.currentOrder) { %>
+            <div class="small text-secondary mt-1">Held until your linked dine-in order reaches ready status.</div>
+          <% } else if (reservedTable.reservationWindow?.end) { %>
+            <div class="small text-secondary mt-1">Expires in <span data-countdown="<%= new Date(reservedTable.reservationWindow.end).toISOString() %>">01:00</span></div>
+          <% } %>
+        </div>
+      <% } %>
+      <div class="table-layout table-layout-grid" id="tableLayout">
+        <% tables.forEach((table) => { %>
+          <form action="/consumer/tables/book" method="POST" class="table-node table-node-grid table-<%= table.status %> table-booking-form">
+            <input type="hidden" name="tableId" value="<%= table._id %>" />
+            <input type="hidden" name="selectedOrderType" value="dine-in" class="selected-order-type-input" />
+            <button type="submit" <%= table.status !== 'available' ? 'disabled data-static-disabled=\"true\"' : '' %>>
+              <strong><%= table.tableNumber %></strong>
+              <span><%= table.seats %> seats</span>
+              <% if (table.status === "reserved" && table.reservationWindow?.end) { %>
+                <small data-countdown="<%= new Date(table.reservationWindow.end).toISOString() %>">01:00</small>
+              <% } %>
+            </button>
+          </form>
+        <% }) %>
+      </div>
+      <div class="legend mt-3">
+        <span><i class="legend available"></i> Available</span>
+        <span><i class="legend reserved"></i> Reserved</span>
+        <span><i class="legend occupied"></i> Occupied</span>
+      </div>
+      <p class="small text-secondary mt-3 mb-0">Reservations expire automatically if the table is not occupied in time.</p>
+    </div>
+
+  </div>
+</div>

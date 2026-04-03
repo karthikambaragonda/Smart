@@ -1,0 +1,10 @@
+<% if (successMessages.length || errorMessages.length) { %>
+  <div class="flash-stack mb-3">
+    <% successMessages.forEach((message) => { %>
+      <div class="alert alert-success shadow-sm"><%= message %></div>
+    <% }) %>
+    <% errorMessages.forEach((message) => { %>
+      <div class="alert alert-danger shadow-sm"><%= message %></div>
+    <% }) %>
+  </div>
+<% } %>

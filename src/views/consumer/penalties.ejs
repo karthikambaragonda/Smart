@@ -1,0 +1,43 @@
+<section class="dashboard-hero">
+  <div>
+    <p class="eyebrow">Penalty Ledger</p>
+    <h1>Penalty Summary</h1>
+    <p class="text-secondary mb-0">Outstanding penalty is automatically added to the next confirmed order.</p>
+  </div>
+  <div class="hero-actions">
+    <a href="/consumer/dashboard" class="btn btn-outline-secondary">Back to Dashboard</a>
+  </div>
+</section>
+
+<div class="panel-card section-card mb-4">
+  <div class="rule-box">
+    Outstanding penalty balance: <strong>Rs. <%= penaltyAmount %></strong>
+  </div>
+</div>
+
+<div class="panel-card section-card">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow mb-2">History</p>
+      <h2 class="mb-1">Penalty Entries</h2>
+    </div>
+  </div>
+  <% if (!penaltyEntries.length) { %>
+    <div class="empty-state">
+      <h3>No penalties recorded</h3>
+      <p>Your penalty ledger is currently clear.</p>
+    </div>
+  <% } %>
+  <% penaltyEntries.forEach((entry) => { %>
+    <div class="order-card mb-3">
+      <div class="d-flex justify-content-between align-items-start gap-3">
+        <div>
+          <strong>Order Collection Penalty</strong>
+          <div class="small text-secondary mt-1"><%= entry.note %></div>
+          <div class="small text-secondary mt-2"><%= new Date(entry.createdAt).toLocaleString() %></div>
+        </div>
+        <span class="price-tag">Rs. <%= entry.amount %></span>
+      </div>
+    </div>
+  <% }) %>
+</div>
